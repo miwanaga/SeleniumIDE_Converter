@@ -1,0 +1,46 @@
+{% import "silk4j.peb" %}
+package {{packageName}};
+
+import com.borland.silktest.jtf.BrowserBaseState;
+import com.borland.silktest.jtf.xbrowser.BrowserApplication;
+import com.borland.silktest.jtf.xbrowser.BrowserWindow;
+import com.borland.silktest.jtf.xbrowser.DomElement;
+import com.borland.silktest.jtf.xbrowser.DomTextField;
+import com.borland.silktest.jtf.Desktop;
+import java.util.regex.Pattern;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import org.openqa.selenium.*;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.Select;
+
+public class {{className}} {
+	private Desktop desktop = new Desktop();
+	private WebDriver driver;
+
+	@Before
+	public void baseState() {
+		BrowserBaseState baseState = new BrowserBaseState();
+		BrowserApplication browserApplication = baseState.execute(desktop);
+		driver = browserApplication.getWebDriver();
+	}
+
+	@Test
+	public void {{methodName}}() throws Exception {
+{% for command in commands %}
+{% if ["open"] contains command.name %}
+{{ commandOpen(command.target, command.value, baseUrl, 2) }}
+{% elseif ["click", "clickAndWait"] contains command.name %}
+{{ commandClick(command.target, command.value, 2) }}
+{% elseif ["select", "selectAndWait"] contains command.name %}
+{{ commandSelect(command.target, command.value, 2) }}
+{% elseif ["selectWindow"] contains command.name %}
+{{ commandSelectWindow(command.target, command.value, 2) }}
+{% elseif ["type"] contains command.name %}
+{{ commandType(command.target, command.value, 2) }}
+{% endif %}
+{% endfor %}
+	}
+}

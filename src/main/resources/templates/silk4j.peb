@@ -1,0 +1,89 @@
+{% macro trim() %}
+{% endmacro %}
+
+{% macro locator(_locator) %}
+{% if     _locator.type equals "xpath" %}
+"{{_locator.locator}}"{{trim}}
+{% elseif _locator.type equals "css" %}
+By.cssSelector("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "id" %}
+By.id("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "link" %}
+By.linkText("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "name" %}
+By.name("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "tag_name" %}
+By.tagName("{{_locator.locator}}"){{trim}}
+{% endif %}
+{% endmacro %}
+
+{% macro findElement(_locator) %}
+{% if _locator.type equals "xpath" %}
+find({{ locator(_locator) }}){{trim}}
+{% else %}
+findElement({{ locator(_locator) }}){{trim}}
+{% endif %}
+{% endmacro %}
+
+{% macro tab(_num) %}
+{% for i in range(1, _num) %}
+	{{trim}}
+{% endfor %}
+{% endmacro %}
+
+
+
+{% macro commandOpen(_target, _value, _baseUrl, _tab) %}
+{% if _target|length > 3 and _target|slice(0, 3)|lower equals "http" %}
+{{tab(_tab)}}desktop.<BrowserWindow>find("//BrowserWindow").navigate("{{_target}}");
+{% else %}
+{{tab(_tab)}}desktop.<BrowserWindow>find("//BrowserWindow").navigate("{{_baseUrl}}{{_target}}");
+{% endif %}
+{% endmacro %}
+
+{% macro commandClick(_target, _value, _tab) %}
+{% set _locator = getLocator(_target, "silk") %}
+{% if _locator.type equals "xpath" %}
+{{tab(_tab)}}desktop.<DomElement>{{ findElement(_locator) }}.click();
+{% else %}
+{{tab(_tab)}}driver.{{ findElement(_locator) }}.click();
+{% endif %}
+{% endmacro %}
+
+{% macro commandSelect(_target, _value, _tab) %}
+{% set _locator = getLocator(_target, "silk") %}
+{% set _option = getListOption(_value, "silk") %}
+{% if _locator.type equals "xpath" %}
+{% if _option.type equals "xpath" %}
+{{tab(_tab)}}desktop.<DomElement>{{ findElement(_locator) }}.{{ findElement(_option) }}.click();
+{% elseif _option.type equals "label" %}
+{{tab(_tab)}}desktop.<DomListBox>{{ findElement(_locator) }}.select("{{_option.locator}}");
+{% elseif _option.type equals "index" %}
+{{tab(_tab)}}desktop.<DomListBox>{{ findElement(_locator) }}.select({{_option.locator}});
+{% endif %}
+{% else %}
+{% if _option.type equals "label" %}
+{{tab(_tab)}}new Select(driver.{{ findElement(_locator) }}).selectByVisibleText("{{_option.locator}}");
+{% elseif _option.type equals "value" %}
+{{tab(_tab)}}new Select(driver.{{ findElement(_locator) }}).selectByValue("{{_option.locator}}");
+{% elseif _option.type equals "id" %}
+{{tab(_tab)}}driver.{{ findElement(_locator) }}).{{ findElement(_option) }}").click();
+{% elseif _option.type equals "index" %}
+{{tab(_tab)}}new Select(driver.{{ findElement(_locator) }}).selectByIndex({{_option.locator}});
+{% endif %}
+{% endif %}
+{% endmacro %}
+
+{% macro commandSelectWindow(_target, _value, _tab) %}
+{{tab(_tab)}}driver.selectWindow();
+{% endmacro %}
+
+{% macro commandType(_target, _value, _tab) %}
+{% set _locator = getLocator(_target, "silk") %}
+{% if _locator.type equals "xpath" %}
+{{tab(_tab)}}desktop.<DomTextField>{{ findElement(_locator) }}.setText("{{ _value }}");
+{% else %}
+{{tab(_tab)}}driver.{{ findElement(_locator) }}.clear();
+{{tab(_tab)}}driver.{{ findElement(_locator) }}.sendKeys("{{ _value }}");
+{% endif %}
+{% endmacro %}

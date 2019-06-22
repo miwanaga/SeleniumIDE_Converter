@@ -1,0 +1,22 @@
+{% macro trim() %}
+{% endmacro %}
+
+{% macro locator(_locator) %}
+{% if     _locator.type equals "xpath" %}
+By.xpath("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "css" %}
+By.cssSelector("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "id" %}
+By.id("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "link" %}
+By.linkText("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "name" %}
+By.name("{{_locator.locator}}"){{trim}}
+{% elseif _locator.type equals "tag_name" %}
+By.tagName("{{_locator.locator}}"){{trim}}
+{% endif %}
+{% endmacro %}
+
+{% macro findElement(_locator) %}
+findElement({{ locator(_locator) }}){{trim}}
+{% endmacro %}
